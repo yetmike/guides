@@ -1,0 +1,16 @@
+# guides
+
+Runnable companion files for my YouTube videos: commands, scripts and code you can copy and run.
+One folder per video. Channel: [YouTube](https://www.youtube.com/channel/UCAjzppzNLxTCZLzeL7hEqTw) · Courses and practice tests: [yetmike.com](https://yetmike.com)
+
+| Folder | Video | What's inside |
+|---|---|---|
+| [ml-kem-768](ml-kem-768/) | Your Browser Already Uses Post-Quantum Crypto (ML-KEM Explained) | OpenSSL 3.5 demo, Go `crypto/mlkem` demo, the ML-KEM-768 math in plain Python |
+
+## No secrets, ever
+
+This repo is public. Demos that create keys do it in a temp directory and delete them.
+Guard rails: `.gitignore` for keys/env/state files, a gitleaks scan on every push (GitHub Actions),
+and GitHub secret scanning with push protection. Contributors: run `pre-commit install` once per clone.
+
+Code here is MIT licensed (see LICENSE).

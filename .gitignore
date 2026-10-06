@@ -1,0 +1,34 @@
+# Never commit secrets. Demos create keys and shared secrets: they stay local.
+*.key
+*.pem
+*.p12
+*.pfx
+*.secret
+*.bin
+id_rsa*
+id_ed25519*
+id_ecdsa*
+*.kubeconfig
+kubeconfig
+.env
+.env.*
+!.env.example
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+credentials*
+secrets*
+!secrets.example*
+
+# Tooling and OS noise
+.DS_Store
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+dist/
+*.log
