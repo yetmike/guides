@@ -1,0 +1,3 @@
+lambda/build/
+terraform/rotator.zip
+.terraform.lock.hcl

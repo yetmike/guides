@@ -6,6 +6,7 @@ One folder per video. Channel: [YouTube](https://www.youtube.com/channel/UCAjzpp
 | Folder | Video | What's inside |
 |---|---|---|
 | [ml-kem-768](ml-kem-768/) | Your Browser Already Uses Post-Quantum Crypto (ML-KEM Explained) | OpenSSL 3.5 demo, Go `crypto/mlkem` demo, the ML-KEM-768 math in plain Python |
+| [aws-secrets-rotation](aws-secrets-rotation/) | AWS Secrets Manager Rotation with Lambda, Explained with a Live Demo | rotation Lambda (Python), Terraform, the bash app, a local test |
 
 ## No secrets, ever
 
