@@ -9,6 +9,7 @@ One folder per video. Channel: [YouTube](https://www.youtube.com/channel/UCAjzpp
 | [aws-secrets-rotation](aws-secrets-rotation/) | AWS Secrets Manager Rotation with Lambda, Explained with a Live Demo | rotation Lambda (Python), Terraform, the bash app, a local test |
 | [alternat-nat-gateway](alternat-nat-gateway/) | AWS NAT Gateway Is Too Expensive. Do This Instead | AlterNAT Terraform (1 zone, small instance), failover test script |
 | [redis-vs-dragonfly](redis-vs-dragonfly/) | Redis vs Dragonfly | Kubernetes manifests (Redis single, cluster, io-threads; Dragonfly), load generator (Go), run script, Grafana dashboards, results |
+| [open-source-licenses-history](open-source-licenses-history/) | The History of Open Source Licenses | license count of the packages on your Debian/Ubuntu machine (Python), method notes, sources for the quotes |
 
 ## No secrets, ever
 
