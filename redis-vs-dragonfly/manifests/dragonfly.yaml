@@ -1,0 +1,43 @@
+# Dragonfly. Test 1 runs it with 1 proactor thread / 1 CPU; `run.sh test2` and
+# `run.sh test3` patch it to 3 threads / 2850m / 768mb maxmemory. Snapshots off
+# to match Redis.
+apiVersion: v1
+kind: Service
+metadata:
+  name: dragonfly
+  namespace: benchmark
+spec:
+  clusterIP: None
+  selector: { app: dragonfly }
+  ports: [{ name: redis, port: 6379 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dragonfly
+  namespace: benchmark
+spec:
+  serviceName: dragonfly
+  replicas: 0
+  selector:
+    matchLabels: { app: dragonfly }
+  template:
+    metadata:
+      labels: { app: dragonfly }
+    spec:
+      nodeSelector: { bench-role: sut-b }
+      # Talos kubelet seccompDefault denies io_uring_setup; Dragonfly then logs
+      # "switching to epoll". Unconfined restores io_uring, the backend Dragonfly
+      # is built around. It also turns seccomp filtering OFF for this pod, and
+      # needs a namespace that allows it (see namespace.yaml). Benchmark-only
+      # pod, no persistent data: think twice before copying this to production.
+      securityContext:
+        seccompProfile: { type: Unconfined }
+      containers:
+        - name: dragonfly
+          image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.40.2
+          args: ["--proactor_threads=1", "--maxmemory=512mb", "--dbfilename=", "--cache_mode=true"] # cache_mode = evict at maxmemory, the equivalent of Redis allkeys-lru
+          ports: [{ name: redis, containerPort: 6379 }]
+          resources:
+            requests: { cpu: "1", memory: 768Mi }
+            limits: { cpu: "1", memory: 768Mi }

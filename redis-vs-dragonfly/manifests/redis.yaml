@@ -1,0 +1,36 @@
+# Test 1: standalone Redis, 1 CPU. Persistence off (cache use case).
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: benchmark
+spec:
+  clusterIP: None
+  selector: { app: redis }
+  ports: [{ name: redis, port: 6379 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: benchmark
+spec:
+  serviceName: redis
+  replicas: 0 # run.sh scales it
+  selector:
+    matchLabels: { app: redis }
+  template:
+    metadata:
+      labels: { app: redis }
+    spec:
+      nodeSelector: { bench-role: sut-a }
+      containers:
+        - name: redis
+          image: redis:8.10.1
+          args: ["--save", "", "--appendonly", "no", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+          ports: [{ name: redis, containerPort: 6379 }]
+          # requests == limits: Guaranteed QoS, so the kernel pins the quota
+          # exactly and neither DB steals burst from the other node's idle.
+          resources:
+            requests: { cpu: "1", memory: 768Mi }
+            limits: { cpu: "1", memory: 768Mi }

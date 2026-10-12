@@ -1,0 +1,67 @@
+# One load generator per database, both on the third node so the clients
+# compete with each other for CPU, never with a database. Rate ramps inside
+# the process; `run.sh restart` starts a fresh ramp. The env values below are
+# the test1 defaults: run.sh overwrites them per test.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen-redis
+  namespace: benchmark
+spec:
+  replicas: 0
+  strategy: { type: Recreate } # a surge pod would not fit next to a 1.5 CPU sibling
+  selector:
+    matchLabels: { app: loadgen-redis }
+  template:
+    metadata:
+      labels: { app: loadgen-redis }
+    spec:
+      nodeSelector: { bench-role: clients }
+      containers:
+        - name: loadgen
+          image: your-registry.example.com/redis-bench-loadgen:0.3.0 # build it from ../loadgen (README)
+          env:
+            - { name: DB, value: redis }
+            - { name: ADDRS, value: redis-0.redis.benchmark.svc.cluster.local:6379 }
+            - { name: WORKERS, value: "256" }
+            - { name: PIPELINE, value: "1" }
+            - { name: RATE_START, value: "10000" }
+            - { name: RATE_STEP, value: "2000" }
+            - { name: RATE_MAX, value: "150000" }
+            - { name: STEP_SECONDS, value: "30" }
+          ports: [{ name: metrics, containerPort: 9090 }]
+          resources:
+            requests: { cpu: "1500m", memory: 256Mi }
+            limits: { cpu: "1500m", memory: 256Mi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen-dragonfly
+  namespace: benchmark
+spec:
+  replicas: 0
+  strategy: { type: Recreate } # a surge pod would not fit next to a 1.5 CPU sibling
+  selector:
+    matchLabels: { app: loadgen-dragonfly }
+  template:
+    metadata:
+      labels: { app: loadgen-dragonfly }
+    spec:
+      nodeSelector: { bench-role: clients }
+      containers:
+        - name: loadgen
+          image: your-registry.example.com/redis-bench-loadgen:0.3.0 # build it from ../loadgen (README)
+          env:
+            - { name: DB, value: dragonfly }
+            - { name: ADDRS, value: dragonfly-0.dragonfly.benchmark.svc.cluster.local:6379 }
+            - { name: WORKERS, value: "256" }
+            - { name: PIPELINE, value: "1" }
+            - { name: RATE_START, value: "10000" }
+            - { name: RATE_STEP, value: "2000" }
+            - { name: RATE_MAX, value: "150000" }
+            - { name: STEP_SECONDS, value: "30" }
+          ports: [{ name: metrics, containerPort: 9090 }]
+          resources:
+            requests: { cpu: "1500m", memory: 256Mi }
+            limits: { cpu: "1500m", memory: 256Mi }
