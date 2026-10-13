@@ -1,0 +1,58 @@
+# RustFS 1.0.1, official image, default durability (strict fsync).
+# One node, one drive. Runs on the same node as MinIO (role label sut-a), each on its
+# own volume, never at the same time: run.sh scales the other one to 0 first.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  namespace: benchmark
+spec:
+  clusterIP: None
+  selector: { app: rustfs }
+  ports: [{ name: s3, port: 9000 }, { name: console, port: 9001 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rustfs
+  namespace: benchmark
+spec:
+  serviceName: rustfs
+  replicas: 0 # run.sh scales it
+  selector:
+    matchLabels: { app: rustfs }
+  template:
+    metadata:
+      labels: { app: rustfs }
+    spec:
+      nodeSelector: { bench-role: sut-a }
+      # The image's user is the name "rustfs" (UID 10001). fsGroup makes the
+      # fresh ext4 volume writable for it; without it the server cannot create
+      # /data/.rustfs. The numeric runAsUser is the same user, spelled so the
+      # kubelet can check it.
+      securityContext: { runAsUser: 10001, runAsGroup: 10001, fsGroup: 10001, fsGroupChangePolicy: OnRootMismatch }
+      containers:
+        - name: rustfs # container name == loadgen DB label; the dashboard keys on it
+          image: rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c
+          env:
+            # s3-bench-creds is created by run.sh with random values. It is not in this repo.
+            - { name: RUSTFS_ACCESS_KEY, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: access-key } } }
+            - { name: RUSTFS_SECRET_KEY, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: secret-key } } }
+            - { name: RUSTFS_ADDRESS, value: ":9000" }
+            - { name: RUSTFS_CONSOLE_ENABLE, value: "true" }
+          ports: [{ name: s3, containerPort: 9000 }, { name: console, containerPort: 9001 }]
+          # /health/ready, not a TCP check: after a restart on existing data the port answers
+          # "Service not ready: waiting for storage_quorum" for a few seconds, and warp does not retry.
+          readinessProbe: { httpGet: { path: /health/ready, port: 9000 }, periodSeconds: 2 }
+          resources:
+            requests: { cpu: "3", memory: 3Gi }
+            limits: { cpu: "3", memory: 3Gi }
+          volumeMounts: [{ name: data, mountPath: /data }, { name: logs, mountPath: /logs }]
+      volumes:
+        - { name: logs, emptyDir: {} } # the image logs to /logs by default; keep that off the image layer
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        # No storageClassName: your default StorageClass is used. Add one here (and in minio.yaml) to pin it.
+        resources: { requests: { storage: 30Gi } }

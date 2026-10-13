@@ -1,0 +1,59 @@
+# One load generator per contender, on the clients node. Only one runs at a
+# time (the contenders run back to back), so each may use 3.4 of the node's 4
+# cores (a 4 KiB GET costs the client about 0.3 CPU-ms). The ramp runs inside the process and ends with a DONE log line.
+# The credentials secret (s3-bench-creds) is created by run.sh with random values. It is not in this repo.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen-minio
+  namespace: benchmark
+spec:
+  replicas: 0
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app: loadgen-minio }
+  template:
+    metadata:
+      labels: { app: loadgen-minio }
+    spec:
+      nodeSelector: { bench-role: clients }
+      containers:
+        - name: loadgen
+          image: your-registry.example.com/s3-bench-loadgen:0.3.0 # build it from ../loadgen (README)
+          env: # run.sh sets the case (OP, OBJECT_SIZE, KEYS, rates) with `kubectl set env`
+            - { name: DB, value: minio }
+            - { name: ENDPOINT, value: "http://minio-0.minio.benchmark.svc.cluster.local:9000" }
+            - { name: ACCESS_KEY, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: access-key } } }
+            - { name: SECRET_KEY, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: secret-key } } }
+          ports: [{ name: metrics, containerPort: 9090 }]
+          resources:
+            requests: { cpu: 3400m, memory: 1Gi }
+            limits: { cpu: 3400m, memory: 1Gi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen-rustfs
+  namespace: benchmark
+spec:
+  replicas: 0
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app: loadgen-rustfs }
+  template:
+    metadata:
+      labels: { app: loadgen-rustfs }
+    spec:
+      nodeSelector: { bench-role: clients }
+      containers:
+        - name: loadgen
+          image: your-registry.example.com/s3-bench-loadgen:0.3.0 # build it from ../loadgen (README)
+          env: # run.sh sets the case (OP, OBJECT_SIZE, KEYS, rates) with `kubectl set env`
+            - { name: DB, value: rustfs }
+            - { name: ENDPOINT, value: "http://rustfs-0.rustfs.benchmark.svc.cluster.local:9000" }
+            - { name: ACCESS_KEY, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: access-key } } }
+            - { name: SECRET_KEY, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: secret-key } } }
+          ports: [{ name: metrics, containerPort: 9090 }]
+          resources:
+            requests: { cpu: 3400m, memory: 1Gi }
+            limits: { cpu: 3400m, memory: 1Gi }
