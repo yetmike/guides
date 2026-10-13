@@ -1,0 +1,10 @@
+# The Dragonfly pod sets seccompProfile Unconfined (see dragonfly.yaml). The
+# "baseline" Pod Security Standard rejects that, and Talos enforces baseline by
+# default, so this namespace is labelled privileged. Delete it after the test.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: benchmark
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged

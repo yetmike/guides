@@ -1,0 +1,42 @@
+# Test 2: Redis Cluster, 3 masters, no replicas (cache use case:
+# --cluster-replicas 0). 950m each because a 4 vCPU node has ~2.9 CPU left
+# after system pods; Dragonfly gets the same 2850m in test2.
+# `run.sh test2` scales it to 3 and runs `redis-cli --cluster create`.
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster
+  namespace: benchmark
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector: { app: redis-cluster }
+  ports: [{ name: redis, port: 6379 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+  namespace: benchmark
+spec:
+  serviceName: redis-cluster
+  replicas: 0
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: { app: redis-cluster }
+  template:
+    metadata:
+      labels: { app: redis-cluster }
+    spec:
+      nodeSelector: { bench-role: sut-a }
+      containers:
+        - name: redis-cluster # container name == loadgen DB label; the dashboard keys on it
+          image: redis:8.10.1
+          args: ["--cluster-enabled", "yes", "--cluster-announce-hostname", "$(POD_NAME).redis-cluster.benchmark.svc.cluster.local", "--cluster-preferred-endpoint-type", "hostname", "--save", "", "--appendonly", "no", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+          env:
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+          ports: [{ name: redis, containerPort: 6379 }, { name: bus, containerPort: 16379 }]
+          resources:
+            requests: { cpu: 950m, memory: 768Mi }
+            limits: { cpu: 950m, memory: 768Mi }

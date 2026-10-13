@@ -1,0 +1,36 @@
+# Test 3 contender: one Redis 8 process with io-threads, same 2850m budget as
+# Dragonfly's 3 threads and the 3-master cluster. Redis 8 runs the main thread
+# plus (io-threads - 1) I/O threads, so io-threads 3 uses three cores.
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-iothreads
+  namespace: benchmark
+spec:
+  clusterIP: None
+  selector: { app: redis-iothreads }
+  ports: [{ name: redis, port: 6379 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-iothreads
+  namespace: benchmark
+spec:
+  serviceName: redis-iothreads
+  replicas: 0
+  selector:
+    matchLabels: { app: redis-iothreads }
+  template:
+    metadata:
+      labels: { app: redis-iothreads }
+    spec:
+      nodeSelector: { bench-role: sut-a }
+      containers:
+        - name: redis-iothreads
+          image: redis:8.10.1
+          args: ["--io-threads", "3", "--io-threads-do-reads", "yes", "--save", "", "--appendonly", "no", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+          ports: [{ name: redis, containerPort: 6379 }]
+          resources:
+            requests: { cpu: 2850m, memory: 768Mi }
+            limits: { cpu: 2850m, memory: 768Mi }
