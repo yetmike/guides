@@ -1,0 +1,53 @@
+# MinIO community edition, last community tag, built from source with
+# ../images/minio/Dockerfile (the official community image and binaries are gone).
+# One node, one drive. Runs on the same node as RustFS (role label sut-a), never at
+# the same time: run.sh scales the other one to 0 first.
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: benchmark
+spec:
+  clusterIP: None
+  selector: { app: minio }
+  ports: [{ name: s3, port: 9000 }, { name: console, port: 9001 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: benchmark
+spec:
+  serviceName: minio
+  replicas: 0 # run.sh scales it
+  selector:
+    matchLabels: { app: minio }
+  template:
+    metadata:
+      labels: { app: minio }
+    spec:
+      nodeSelector: { bench-role: sut-a }
+      # Same identity as RustFS (its image runs as 10001), so both write the
+      # volume as an unprivileged user through the same fsGroup.
+      securityContext: { runAsUser: 10001, runAsGroup: 10001, fsGroup: 10001, fsGroupChangePolicy: OnRootMismatch }
+      containers:
+        - name: minio # container name == loadgen DB label; the dashboard keys on it
+          image: your-registry.example.com/minio-community:RELEASE.2025-10-15T17-29-55Z # build it from ../images/minio (README)
+          args: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
+          env:
+            # s3-bench-creds is created by run.sh with random values. It is not in this repo.
+            - { name: MINIO_ROOT_USER, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: access-key } } }
+            - { name: MINIO_ROOT_PASSWORD, valueFrom: { secretKeyRef: { name: s3-bench-creds, key: secret-key } } }
+            - { name: MINIO_UPDATE, value: "off" } # no update check: the old download site answers 410 now
+          ports: [{ name: s3, containerPort: 9000 }, { name: console, containerPort: 9001 }]
+          readinessProbe: { httpGet: { path: /minio/health/live, port: 9000 }, periodSeconds: 2 }
+          resources:
+            requests: { cpu: "3", memory: 3Gi }
+            limits: { cpu: "3", memory: 3Gi }
+          volumeMounts: [{ name: data, mountPath: /data }]
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        # No storageClassName: your default StorageClass is used. Add one here (and in rustfs.yaml) to pin it.
+        resources: { requests: { storage: 30Gi } }

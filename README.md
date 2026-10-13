@@ -10,6 +10,7 @@ One folder per video. Channel: [YouTube](https://www.youtube.com/channel/UCAjzpp
 | [alternat-nat-gateway](alternat-nat-gateway/) | AWS NAT Gateway Is Too Expensive. Do This Instead | AlterNAT Terraform (1 zone, small instance), failover test script |
 | [redis-vs-dragonfly](redis-vs-dragonfly/) | Redis vs Dragonfly | Kubernetes manifests (Redis single, cluster, io-threads; Dragonfly), load generator (Go), run script, Grafana dashboards, results |
 | [open-source-licenses-history](open-source-licenses-history/) | The History of Open Source Licenses | license count of the packages on your Debian/Ubuntu machine (Python), method notes, sources for the quotes |
+| [minio-vs-rustfs](minio-vs-rustfs/) | MinIO vs RustFS | Kubernetes manifests, MinIO built from source (Dockerfile), S3 load generator (Go), run scripts (speed ramps, node loss with SHA-256 verify, resource use), Grafana dashboards, results |
 
 ## No secrets, ever
 

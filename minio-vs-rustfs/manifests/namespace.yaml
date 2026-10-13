@@ -1,0 +1,7 @@
+# Everything of this benchmark lives here. Both servers run as an unprivileged
+# user with the default seccomp profile, so the namespace needs no Pod Security
+# exception. Delete it after the test (README, "Clean up").
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: benchmark
