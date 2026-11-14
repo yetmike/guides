@@ -11,6 +11,9 @@ One folder per video. Channel: [YouTube](https://www.youtube.com/channel/UCAjzpp
 | [redis-vs-dragonfly](redis-vs-dragonfly/) | Redis vs Dragonfly | Kubernetes manifests (Redis single, cluster, io-threads; Dragonfly), load generator (Go), run script, Grafana dashboards, results |
 | [open-source-licenses-history](open-source-licenses-history/) | The History of Open Source Licenses | license count of the packages on your Debian/Ubuntu machine (Python), method notes, sources for the quotes |
 | [minio-vs-rustfs](minio-vs-rustfs/) | MinIO vs RustFS | Kubernetes manifests, MinIO built from source (Dockerfile), S3 load generator (Go), run scripts (speed ramps, node loss with SHA-256 verify, resource use), Grafana dashboards, results |
+| [history-of-shells](history-of-shells/) | Why Bash Still Speaks 1979 (50 Years of Unix Shells) | Dockerfile with every shell from the film (bash, dash, zsh, fish, tcsh, ksh, BusyBox, Nushell, an unpatched bash 4.3), the nine terminal demos with expected output |
+| [docker-vs-podman](docker-vs-podman/) | Podman vs Docker: Why Podman Lost (and Where It Still Wins) | the docker group is root (script), rootless Podman uid mapping (script, runs with or without Podman installed), the Quadlet file |
+| [dockershim](dockershim/) | Kubernetes Dropped Docker? What Really Happened With Dockershim | `check.sh` (runtime per node, pods that mount docker.sock), a test pod, kind demo steps |
 
 ## No secrets, ever
 
