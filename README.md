@@ -14,6 +14,7 @@ One folder per video. Channel: [YouTube](https://www.youtube.com/channel/UCAjzpp
 | [history-of-shells](history-of-shells/) | Why Bash Still Speaks 1979 (50 Years of Unix Shells) | Dockerfile with every shell from the film (bash, dash, zsh, fish, tcsh, ksh, BusyBox, Nushell, an unpatched bash 4.3), the nine terminal demos with expected output |
 | [docker-vs-podman](docker-vs-podman/) | Podman vs Docker: Why Podman Lost (and Where It Still Wins) | the docker group is root (script), rootless Podman uid mapping (script, runs with or without Podman installed), the Quadlet file |
 | [dockershim](dockershim/) | Kubernetes Dropped Docker? What Really Happened With Dockershim | `check.sh` (runtime per node, pods that mount docker.sock), a test pod, kind demo steps |
+| [containerd-vs-crio](containerd-vs-crio/) | containerd vs CRI-O: Does It Actually Matter? | `demo.sh` (kind containerd + minikube CRI-O side by side: runtime column, crictl, config files, image stores, shim vs conmon, OCI runtime, default capabilities), two test pods |
 
 ## No secrets, ever
 
