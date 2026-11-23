@@ -15,6 +15,7 @@ One folder per video. Channel: [YouTube](https://www.youtube.com/channel/UCAjzpp
 | [docker-vs-podman](docker-vs-podman/) | Podman vs Docker: Why Podman Lost (and Where It Still Wins) | the docker group is root (script), rootless Podman uid mapping (script, runs with or without Podman installed), the Quadlet file |
 | [dockershim](dockershim/) | Kubernetes Dropped Docker? What Really Happened With Dockershim | `check.sh` (runtime per node, pods that mount docker.sock), a test pod, kind demo steps |
 | [containerd-vs-crio](containerd-vs-crio/) | containerd vs CRI-O: Does It Actually Matter? | `demo.sh` (kind containerd + minikube CRI-O side by side: runtime column, crictl, config files, image stores, shim vs conmon, OCI runtime, default capabilities), two test pods |
+| [what-claude-sends](what-claude-sends/) | Claude Code Privacy: I Read Every Request It Sends | mitmproxy capture script with an empty environment and throwaway config, redaction addon, a viewer for the captures, the fake key trick |
 
 ## No secrets, ever
 
